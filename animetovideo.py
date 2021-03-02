@@ -11,13 +11,13 @@ from video_repetitions import read_videos
 parser = argparse.ArgumentParser(description = "Check repetitions in a corpus of video files")
 parser.add_argument("-i", "--input", nargs= '*', metavar = "path", type = str, \
                     help = "Video files names separated by spaces.")
-parser.add_argument("-o", "--output", nargs= 1, metavar = "output_file", type = str, \
+parser.add_argument("-o", "--output", metavar = "output_file", type = str, \
                     default = sys.stdout, \
                     help = "Outputs results in specified file. Defaults to standard output.")
-parser.add_argument("-m", "--method", nargs = 1, metavar = "method", type = str, \
-                    default = None, \
+parser.add_argument("-m", "--method", metavar = "method", type = str, \
+                    default = 'average', \
                     help = "Method to compare video frames.")
-parser.add_argument("-p", "--period", nargs = 1, metavar = "minimum_repetion_period", \
+parser.add_argument("-p", "--period", metavar = "minimum_repetion_period", \
                     type = int, default = 24, \
                     help = "Minimum period for a meaningful repetition.")
 
@@ -31,7 +31,7 @@ if len(args.input) == 0:
 # print(args.method)
 # print(args.period)
 
-result = read_videos(args.input, repetitions_period=args.period, verbose=True)
+result = read_videos(args.input, method=args.method, repetitions_period=args.period, verbose=True)
 for filename in result:
     print(filename, ':', file=args.output)
     for start, end in result[filename]:

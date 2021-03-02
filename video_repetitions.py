@@ -13,7 +13,17 @@ TEST_2 = 'Special+BERSERK+-+Hard+Corner+(Benzaie).mp4'
 FRAMES_DICT = {}
 FLAGS = {}
 
-MINIMUM_PERIOD = 24
+MIN_PERIOD = 24
+
+METHODS = {
+    'bytes': lambda x: hash(x.tobytes),
+    'string': lambda x: hash(str(x.data)),
+    'average': lambda x: imagehash.average_hash(Image.fromarray(x, 'RGB')),
+    'perceptual': lambda x: imagehash.phash(Image.fromarray(x, 'RGB')),
+    'difference': lambda x: imagehash.dhash(Image.fromarray(x, 'RGB')),
+    'wavelet': lambda x: imagehash.whash(Image.fromarray(x, 'RGB')),
+    'color': lambda x: imagehash.colorhash(Image.fromarray(x, 'RGB'))
+}
 
 def log(string, boolean):
     """
@@ -30,7 +40,7 @@ def update_progress(progress, total):
     print('{}%\r'.format(percentage), end='')
 
 
-def read_videos(files, repetitions_period=MINIMUM_PERIOD, verbose=False):
+def read_videos(files, method='average', repetitions_period=MIN_PERIOD, verbose=False):
     """
     read_videos
     :param files: path to files. Episodes are expected to be in order
@@ -41,15 +51,17 @@ def read_videos(files, repetitions_period=MINIMUM_PERIOD, verbose=False):
     frames_dicts = []
     flags = {}
     for filename in files:
-        flags[filename] = read_video(filename, frames_dicts, repetitions_period, verbose)
+        flags[filename] = read_video(filename, frames_dicts=frames_dicts, \
+                                     method=method, \
+                                     rep_period=repetitions_period, verbose=verbose)
     return flags
 
-def read_video(filename, frames_dicts=None, repetitions_period=MINIMUM_PERIOD, verbose=False):
+def read_video(filename, frames_dicts=None, method='average', rep_period=MIN_PERIOD, verbose=False):
     """
     read_videos
     :param filename: path to file
     :param frames_dict: lists of episodes' dictionary of frames. Defaults to []
-    :param repetitions_period: minimum period of a meaningful repetition. Defaults to 1 second
+    :param rep_period: minimum period of a meaningful repetition. Defaults to 1 second
     :param verbose: should the function print output or not
     :return: list of pairs (start, end) that flag a frame repetition in filename
     """
@@ -64,9 +76,7 @@ def read_video(filename, frames_dicts=None, repetitions_period=MINIMUM_PERIOD, v
     matched = False # After the first match is hit, the state alternates between match and not match
     flags = []
     while success:
-        my_hash = imagehash.average_hash(Image.fromarray(image, 'RGB'))
-        # my_hash = hash(str(image.data))
-        # my_hash = hash(image.tobytes())
+        my_hash = METHODS[method](image)
         # Adding frame information
         if my_hash in my_dict:
             my_dict[my_hash].append(count)
@@ -84,7 +94,7 @@ def read_video(filename, frames_dicts=None, repetitions_period=MINIMUM_PERIOD, v
             # Check that last entry is "long" enough to be meaningful
             if len(flags) > 0:
                 start, end = flags[-1]
-                if end - start < repetitions_period:
+                if end - start < rep_period:
                     flags.pop(-1)
             matched = False
         success, image = vidcap.read()
