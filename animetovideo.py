@@ -6,7 +6,7 @@ Find repetitions in a corpus of video files
 
 import sys
 import argparse
-from video_repetitions import read_videos
+from video_repetitions import read_videos, METHODS
 
 parser = argparse.ArgumentParser(description = "Check repetitions in a corpus of video files")
 parser.add_argument("-i", "--input", nargs= '*', metavar = "path", type = str, \
@@ -15,7 +15,7 @@ parser.add_argument("-o", "--output", metavar = "output_file", type = str, \
                     default = sys.stdout, \
                     help = "Outputs results in specified file. Defaults to standard output.")
 parser.add_argument("-m", "--method", metavar = "method", type = str, \
-                    default = 'average', \
+                    choices=METHODS.keys(), default = 'average', \
                     help = "Method to compare video frames.")
 parser.add_argument("-p", "--period", metavar = "minimum_repetion_period", \
                     type = int, default = 24, \
