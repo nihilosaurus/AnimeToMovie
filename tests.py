@@ -6,11 +6,12 @@ Tests cases
 
 from video_repetitions import read_videos
 
-def do_test(name, value):
+def do_test(name, function):
     """
     Do test
     """
-    passed = 'PASSED' if value else 'FAILED'
+    print(name, '...\r', end='')
+    passed = 'PASSED' if function() else 'FAILED'
     print(name, '[', passed, ']')
 
 def test_1():
@@ -34,7 +35,7 @@ def test_1():
 
 
 TESTS = {
-    'Opening detection from repetitions': test_1()
+    'Opening detection from repetitions': test_1
 }
 
 
